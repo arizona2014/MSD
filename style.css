@@ -1,0 +1,22 @@
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+#map-canvas {
+	height: 100%;
+	width: 50%;
+}
+#content-pane {
+	float:right;
+	width:48%;
+	padding-left: 2%;
+}
+#outputDiv {
+	font-size: 11px;	
+}
+
+.hiden {
+	display:none
+}
