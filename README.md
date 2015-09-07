@@ -1,7 +1,8 @@
 # MSD
 
-Pornind de la o multime de puncte geoJSON avem urmatoarele operatii :
-- calcularea distantelor dintre toate punctele
-- crearea grafului corespunzator
-- executarea algoritmului de drum minim
-- afisarea drumului minim 
+Starting from a array of geoJSON coordinates we have the following steps :
+
+- compute the distances between all the coordinates
+- create the coresponding graph
+- running the TSP algorithm
+- displaying the minimal cost route
