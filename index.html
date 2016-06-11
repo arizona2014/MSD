@@ -2,25 +2,232 @@
 <html>
   <head>
     <title>Distance Matrix service</title>
-	<link rel="stylesheet" href="style.css" type="text/css" />
+	<link rel="stylesheet" href="style.css" type="text/css" />	
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>	
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>	
-	<script src="step1.js"></script>
-  </head>
-  <body>
+	<script src="BpTspSolver.js"></script>
+	
+	<script>
+		
+		var map;
+		var tsp;
+		var directionsPanel;
+		var line;		
+		
+		var origin0 = new google.maps.LatLng(48.893401, 2.091545);
+		var origin1 = new google.maps.LatLng(48.903332, 2.040819);
+		var destination1 = new google.maps.LatLng(48.903332, 2.040819);
+		var origin2 = new google.maps.LatLng(48.939371, 2.166818);
+		var destination2 = new google.maps.LatLng(48.939371, 2.166818);
+		var origin3 = new google.maps.LatLng(48.866816, 2.191709);
+		var destination3 = new google.maps.LatLng(48.866816, 2.191709);
+		var origin4 = new google.maps.LatLng(48.847954, 2.138151);
+		var destination4 = new google.maps.LatLng(48.847954, 2.138151);
+		var origin5 = new google.maps.LatLng(48.859362, 2.021421);
+		var destination5 = new google.maps.LatLng(48.859362, 2.021421);	
+
+		var marker1;
+		var marker2;
+		var marker3;
+		var marker4;
+		var marker5;
+		var marker6;		
+		
+		google.maps.event.addDomListener(window, 'load', initialize);
+
+
+		function initialize() 
+		{
+			var opts;
+			opts = {
+				center: new google.maps.LatLng(48.893401, 2.091545),
+				zoom: 12,
+				mapTypeId: google.maps.MapTypeId.ROADMAP
+			};
+			map = new google.maps.Map(document.getElementById('map-canvas'), opts);
+			geocoder = new google.maps.Geocoder();
+		}
+				
+		function loadCoords() 
+		{		
+
+			marker1 = new google.maps.Marker({
+			  position: origin0,
+			  map: map,
+			  icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=1|FF0000|000000',
+			  title: 'Prima adresa'
+			});		
+
+			marker2 = new google.maps.Marker({
+			  position: origin1,
+			  map: map,
+			  icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=2|FF0000|000000',
+			  title: 'A doua adresa'
+			});		
+
+			marker3 = new google.maps.Marker({
+			  position: origin2,
+			  map: map,
+			  icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=3|FF0000|000000',
+			  title: 'A treia adresa'
+			});		
+
+			marker4 = new google.maps.Marker({
+			  position: origin3,
+			  map: map,
+			  icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=4|FF0000|000000',
+			  title: 'A patra adresa'
+			});		
+			
+			marker5 = new google.maps.Marker({
+			  position: origin4,
+			  map: map,
+			  icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=5|FF0000|000000',
+			  title: 'A cincia adresa'
+			});		
+
+			marker6 = new google.maps.Marker({
+			  position: origin5,
+			  map: map,
+			  icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=6|FF0000|000000',
+			  title: 'A sasea adresa'
+			});		
+
+			$('#lC').hide();
+			$('#cR').removeClass('hidden').show();
+			
+		}			
+		
+		function calculateRoutes() 
+		{
+			directionsPanel = document.getElementById("my_textual_div");
+			// Create the tsp object
+			tsp = new BpTspSolver(map, directionsPanel);
+			// Set your preferences
+			tsp.setAvoidHighways(true);
+			tsp.setTravelMode(google.maps.DirectionsTravelMode.WALKING);
+
+			// Add points (by coordinates, or by address).
+			// The first point added is the starting location.
+			// The last point added is the final destination (in the case of A - Z mode)		
+		
+			tsp.addWaypoint(origin0);  // Note: The callback is new for version 3, to ensure waypoints and addresses appear in the order they were added in.
+			tsp.addWaypoint(origin1);  // Note: The callback is new for version 3, to ensure waypoints and addresses appear in the order they were added in.
+			tsp.addWaypoint(origin2);  // Note: The callback is new for version 3, to ensure waypoints and addresses appear in the order they were added in.
+			tsp.addWaypoint(origin3);  // Note: The callback is new for version 3, to ensure waypoints and addresses appear in the order they were added in.
+			tsp.addWaypoint(origin4);  // Note: The callback is new for version 3, to ensure waypoints and addresses appear in the order they were added in.
+			tsp.addWaypoint(origin5);  // Note: The callback is new for version 3, to ensure waypoints and addresses appear in the order they were added in.
+
+			// Solve the problem (start and end up at the first location)
+			//tsp.solveRoundTrip(onSolveCallbackRoundTrip);
+			// Or, if you want to start in the first location and end at the last,
+			// but don't care about the order of the points in between:
+			tsp.solveAtoZ(onSolveCallbackAtoZ);		
+		}		
+		
+		function onSolveCallbackRoundTrip()
+		{
+			var order = tsp.getOrder();
+			// Retrieve the solution (so you can display it to the user or do whatever :-)
+			var dir = tsp.getGDirections();  // This is a normal GDirections object.
+			// The order of the elements in dir now correspond to the optimal route.
+			// If you just want the permutation of the location indices that is the best route:
+			// If you want the duration matrix that was used to compute the route:
+			var durations = tsp.getDurations();		
+			console.log(order);	
+		}
+		
+		function onSolveCallbackAtoZ()
+		{
+			var order = tsp.getOrder();
+			// Retrieve the solution (so you can display it to the user or do whatever :-)
+			var dir = tsp.getGDirections();  // This is a normal GDirections object.
+			// The order of the elements in dir now correspond to the optimal route.
+			// If you just want the permutation of the location indices that is the best route:
+			// If you want the duration matrix that was used to compute the route:
+			var durations = tsp.getDurations();
+			var flightPlanCoordinates = [];
+			
+			for(i=0;i<order.length;i++)
+			{
+				switch(order[i])
+				{
+					case 0:
+						flightPlanCoordinates.push(origin0);		
+						break;
+					case 1:
+						flightPlanCoordinates.push(origin1);		
+						break;
+					case 2:
+						flightPlanCoordinates.push(origin2);		
+						break;
+					case 3:
+						flightPlanCoordinates.push(origin3);		
+						break;
+					case 4:
+						flightPlanCoordinates.push(origin4);		
+						break;
+					case 5:
+						flightPlanCoordinates.push(origin5);		
+						break;						
+				}				
+			}
+			flightPlanCoordinates.push(origin0);
+			
+					
+			var lineSymbol = {
+				path: google.maps.SymbolPath.CIRCLE,
+				scale: 8,
+				strokeColor: '#393'
+			};			
+			
+			line = new google.maps.Polyline({
+				path: flightPlanCoordinates,
+				icons: [{
+				  icon: lineSymbol,
+				  offset: '0%'
+				}],			
+				geodesic: true,
+				strokeColor: '#FF0000',
+				strokeOpacity: 1.0,
+				strokeWeight: 2,
+				map: map
+			});
+
+			
+			line.setMap(map);			
+			animateCircle();
+			
+			//$("#outputDiv").html(order.toString());	
+			//console.log(order);	
+		}	
+		
+		function animateCircle() 
+		{
+			var count = 0;
+			window.setInterval(function() 
+			{
+			  count = (count + 1) % 200;
+			  var icons = line.get('icons');
+			  icons[0].offset = (count / 2) + '%';
+			  line.set('icons', icons);
+			}, 50);
+		}
+		
+	
+	</script>
+</head>
+<body>
     <div id="content-pane">
       <div id="inputs">
-        <p>
-			<button type="button" onclick="calculateDistances0();">Calculate 0</button>
-			<button type="button" onclick="calculateDistances1();">Calculate 1</button>
-			<button type="button" onclick="calculateDistances2();">Calculate 2</button>
-			<button type="button" onclick="calculateDistances3();">Calculate 3</button>
-			<button type="button" onclick="calculateDistances4();">Calculate 4</button>
-			<button type="button" onclick="calculateDistances5();">Calculate 5</button>
-		</p>
+		<input id='lC' type="button" value="Load coords" onclick="javascript:loadCoords();" class="btn btn-small btn-warning" /> 
+		<input id='cR' type="button" value="Calculate routes" class="hidden btn btn-small btn-warning" onclick="javascript:calculateRoutes();" />		
       </div>
       <div id="outputDiv"></div>
     </div>
     <div id="map-canvas"></div>
-  </body>
+</body>
 </html>
 
